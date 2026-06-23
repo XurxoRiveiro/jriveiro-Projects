@@ -56,7 +56,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-seri
 
 /* METRICS */
 .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;transition:border-color .15s,box-shadow .15s;}
+.metric[onclick]:hover{border-color:var(--border2);box-shadow:0 2px 8px rgba(0,0,0,.06);}
 .m-label{font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
 .m-val{font-size:28px;font-weight:700;color:var(--text);line-height:1;}
 .m-sub{font-size:11px;color:var(--text3);margin-top:4px;}
@@ -191,9 +192,14 @@ tr:last-child td{border-bottom:none;}
 
   <div class="sb-section">Proyectos</div>
   <div class="sb-item" onclick="nav(this,'proyectos')"><span class="sb-icon">📁</span>Todos mis proyectos</div>
+  <div class="sb-item" onclick="nav(this,'santander')"><span class="sb-icon">🏦</span>Santander<span class="sb-badge amber">2 bajas</span></div>
+  <div class="sb-item" onclick="nav(this,'openbank')"><span class="sb-icon">🏦</span>OpenBank</div>
+  <div class="sb-item" onclick="nav(this,'bbva')"><span class="sb-icon">🏦</span>BBVA · Code2Doc + Squad</div>
+  <div class="sb-item" onclick="nav(this,'bancamarch')"><span class="sb-icon">🏦</span>Banca March / nCino</div>
   <div class="sb-item" onclick="nav(this,'sanitas')"><span class="sb-icon">🏥</span>Sanitas · Healthy Cities<span class="sb-badge red">!</span></div>
   <div class="sb-item" onclick="nav(this,'caixa')"><span class="sb-icon">📐</span>Caixa · Tallas apps</div>
-  <div class="sb-item" onclick="nav(this,'bbva')"><span class="sb-icon">💼</span>BBVA · Code2Doc + Squad</div>
+  <div class="sb-item" onclick="nav(this,'ibercaja')"><span class="sb-icon">🏛️</span>Ibercaja Bambú</div>
+  <div class="sb-item" onclick="nav(this,'bancoespana')"><span class="sb-icon">🏛️</span>Banco de España<span class="sb-badge red">Miérc.</span></div>
 
   <div class="sb-section">Personas</div>
   <div class="sb-item" onclick="nav(this,'personas')"><span class="sb-icon">👥</span>Recursos y staffing<span class="sb-badge red">6</span></div>
@@ -224,10 +230,10 @@ tr:last-child td{border-bottom:none;}
   </div>
 
   <div class="metrics">
-    <div class="metric m-red"><div class="m-label">Críticas hoy</div><div class="m-val">5</div><div class="m-sub">no pueden esperar</div></div>
-    <div class="metric m-amber"><div class="m-label">Sin cubrir</div><div class="m-val">6</div><div class="m-sub">posiciones urgentes</div></div>
-    <div class="metric"><div class="m-label">Facturación jun</div><div class="m-val">299K€</div><div class="m-sub">estimado · 8 proyectos</div></div>
-    <div class="metric m-green"><div class="m-label">Mi área</div><div class="m-val">40</div><div class="m-sub">personas · Banca y Seguros</div></div>
+    <div class="metric m-red" onclick="goTo('alertas')" style="cursor:pointer;" title="Ver alertas críticas"><div class="m-label">Críticas hoy</div><div class="m-val">5</div><div class="m-sub">no pueden esperar →</div></div>
+    <div class="metric m-amber" onclick="goTo('personas')" style="cursor:pointer;" title="Ver staffing"><div class="m-label">Sin cubrir</div><div class="m-val">6</div><div class="m-sub">posiciones urgentes →</div></div>
+    <div class="metric" onclick="goTo('cierre')" style="cursor:pointer;" title="Ver cierre de mes"><div class="m-label">Facturación jun</div><div class="m-val">299K€</div><div class="m-sub">estimado · 8 proyectos →</div></div>
+    <div class="metric m-green" onclick="goTo('proyectos')" style="cursor:pointer;" title="Ver todos mis proyectos"><div class="m-label">Mi área</div><div class="m-val">40</div><div class="m-sub">personas · Banca y Seguros →</div></div>
   </div>
 
   <div class="section-hdr">Crítico — hoy mismo</div>
@@ -652,6 +658,97 @@ tr:last-child td{border-bottom:none;}
     <div class="person-row"><div class="avatar av-purple">JL</div><div style="flex:1"><div class="person-name">Jesús López Tormo</div><div class="person-detail">Santander · principal · siempre a través de Natalia Lirón</div></div><span class="badge b-purple">Cliente</span></div>
     <div class="person-row"><div class="avatar av-purple">TP</div><div style="flex:1"><div class="person-name">Thania Paradelo</div><div class="person-detail">nCino · tparadelo@hiberus.com · gestión día a día Bernardo</div></div><span class="badge b-purple">Cliente</span></div>
     <div class="person-row"><div class="avatar av-purple">JDe</div><div style="flex:1"><div class="person-name">Javier Decena</div><div class="person-detail">Banco de España · Smart Evolution · cierre miércoles</div></div><span class="badge b-purple">Cliente</span></div>
+  </div></div>
+</div>
+
+
+<!-- ═══ SANTANDER ═══ -->
+<div class="pane" id="pane-santander">
+  <div class="topbar"><div><div class="page-title">Santander</div><div class="page-sub">2023-19139 · Natalia Lirón (interna)</div></div><span class="badge b-amber">ÁMBAR</span></div>
+  <div class="alert alert-red"><div class="alert-title">2 personas se van el 1 de julio · 7 días para cubrir</div><div class="alert-sub">Hablar con Natalia Lirón hoy · identificar perfiles Java/SpringBoot · arrancar búsqueda urgente</div></div>
+  <div class="section-hdr">Líneas activas</div>
+  <div class="card"><div class="card-body">
+    <div class="row"><div class="row-l"><div class="row-title">Microservicios · 11 recursos · ~64K€/mes</div><div class="row-sub">Java/SpringBoot · tarifas antiguas · Jesús López Tormo (cliente)</div></div><span class="badge b-red">2 bajas 1 jul</span></div>
+    <div class="row"><div class="row-l"><div class="row-title">Alemania · Migración APIs · 2026-37822</div><div class="row-sub">Héctor Villena JP · Gónzalo Quintero (cta) · entrega parcial julio · retraso imputable al banco</div></div><span class="badge b-amber">Cierra jul</span></div>
+    <div class="row"><div class="row-l"><div class="row-title">Struts → SpringBoot · Assessment</div><div class="row-sub">Saúl + Luis Novoa · propuesta enviada · falta decisión cliente</div></div><span class="badge b-gray">Pendiente</span></div>
+    <div class="row"><div class="row-l"><div class="row-title">GND · Pipeline · 60K</div></div><span class="badge b-purple">Pipeline</span></div>
+  </div></div>
+  <div class="section-hdr">Equipo microservicios</div>
+  <div class="card"><div class="card-body">
+    <div class="row"><div class="row-l"><div class="row-title">Carmen Sirgo · David Gómez · Eduardo García · Jorge Barriendos</div></div></div>
+    <div class="row"><div class="row-l"><div class="row-title">Jorge Perez · Luis Alfonso Sánchez · Marcos Abdel · Nilo Frías</div></div></div>
+    <div class="row"><div class="row-l"><div class="row-title">Rogelio Lacruz · Francisco Javier Toro · José Ignacio Lopez</div></div></div>
+    <div class="row"><div class="row-l"><div class="row-title">Harold Rojas</div><div class="row-sub">⚠️ Tarifa 0€ — revisar con Natalia</div></div><span class="badge b-red">Revisar</span></div>
+  </div></div>
+</div>
+
+<!-- ═══ OPENBANK ═══ -->
+<div class="pane" id="pane-openbank">
+  <div class="topbar"><div><div class="page-title">OpenBank</div><div class="page-sub">2023-20669 · Felipe + Álvaro Alcay</div></div><span class="badge b-amber">ÁMBAR</span></div>
+  <div class="alert alert-amber"><div class="alert-title">Jahiro Álvarez — ¿firmó contrato? · entra 6 julio · confirmar SBA + MTE + 2 equipos Mac+Hiberus</div></div>
+  <div class="section-hdr">Estado</div>
+  <div class="card"><div class="card-body">
+    <div class="row"><div class="row-l"><div class="row-title">Microservicios · 9+2 recursos · ~66K€/mes</div><div class="row-sub">Doble coste Mac+Hiberus · lleva 2-3 años · comerciales agresivos</div></div><span class="badge b-green">Activo</span></div>
+    <div class="row"><div class="row-l"><div class="row-title">Yoan Marin</div><div class="row-sub">Entra 29 junio · interno recolocado</div></div><span class="badge b-green">Confirmado</span></div>
+    <div class="row"><div class="row-l"><div class="row-title">Jahiro Álvarez</div><div class="row-sub">Entra 6 julio · 60€/h · ¿firmó contrato? · alta MTE + 2 equipos Mac+Hiberus</div></div><span class="badge b-red">SBA pendiente</span></div>
+  </div></div>
+  <div class="section-hdr">Equipo activo</div>
+  <div class="card"><div class="card-body">
+    <div class="row"><div class="row-l"><div class="row-title">Jorge Andreu · Rubén Llorens · Cristian Martinez · Jorge Carlos Maza</div></div></div>
+    <div class="row"><div class="row-l"><div class="row-title">Napoleón Ávila · F.J. Jimenez · Álvaro García · Julian de Juan · José Adrián Palacios</div></div></div>
+  </div></div>
+</div>
+
+<!-- ═══ BANCA MARCH / nCino ═══ -->
+<div class="pane" id="pane-bancamarch">
+  <div class="topbar"><div><div class="page-title">Banca March / nCino</div><div class="page-sub">Javier Hernaiz Gutiérrez · Madrid · jhernaiz@hiberus.com</div></div><span class="badge b-green">VERDE</span></div>
+  <div class="section-hdr">Proyectos activos</div>
+  <div class="card"><div class="card-body">
+    <div class="row"><div class="row-l"><div class="row-title">Analista Orgánico Java · 2026-37277</div><div class="row-sub">Miguel Angel Lopez Vicente · 48,67€/h · 1er mes free · posición abierta en MTE</div></div><span class="badge b-green">Activo</span></div>
+    <div class="row"><div class="row-l"><div class="row-title">nCino · Soporte Integración · 2026-39683</div><div class="row-sub">Bernardo Martinez · 60€/h · margen 42% · entra 6 julio · 9-16h verano · alta MTE pendiente</div></div><span class="badge b-blue">Entra 6 jul</span></div>
+    <div class="row"><div class="row-l"><div class="row-title">2ª posición · perfil Salesforce</div><div class="row-sub">Área Laura Anchuelo / Thania Paradelo · sin candidato</div></div><span class="badge b-red">Sin candidato</span></div>
+  </div></div>
+  <div class="section-hdr">Datos nCino · Bernardo Martinez</div>
+  <div class="card"><div class="card-body">
+    <div class="row"><div class="row-l"><div class="row-title">Código proyecto</div></div><b>2026-39683</b></div>
+    <div class="row"><div class="row-l"><div class="row-title">Tarifa</div></div><b>60€/h</b></div>
+    <div class="row"><div class="row-l"><div class="row-title">Coste Bernardo</div></div><b>5.232,73€/mes · margen 42%</b></div>
+    <div class="row"><div class="row-l"><div class="row-title">Horario verano</div></div><b>9:00-16:00h · 35h/semana</b></div>
+    <div class="row"><div class="row-l"><div class="row-title">Horario invierno</div></div><b>9:00-18:00h · 40h/semana</b></div>
+    <div class="row"><div class="row-l"><div class="row-title">Duración</div></div><b>4 meses</b></div>
+    <div class="row"><div class="row-l"><div class="row-title">Contacto cliente</div></div><b>Thania Paradelo · tparadelo@hiberus.com</b></div>
+  </div></div>
+</div>
+
+<!-- ═══ IBERCAJA ═══ -->
+<div class="pane" id="pane-ibercaja">
+  <div class="topbar"><div><div class="page-title">Ibercaja Bambú</div><div class="page-sub">2025-35203 · Ignacio Carcas (interno)</div></div><span class="badge b-green">VERDE · Estable</span></div>
+  <div class="alert alert-blue"><div class="alert-title">Reunión jueves con Ignacio Carcas · preparar datos de facturación y estado del equipo</div></div>
+  <div class="section-hdr">Estado</div>
+  <div class="card"><div class="card-body">
+    <div class="row"><div class="row-l"><div class="row-title">9 recursos activos · ~95K€/mes</div><div class="row-sub">Proyecto estable · sin movimientos · reunión jueves</div></div><span class="badge b-green">Estable</span></div>
+  </div></div>
+  <div class="section-hdr">Equipo</div>
+  <div class="card"><div class="card-body">
+    <div class="row"><div class="row-l"><div class="row-title">Aldo Ernesto Rodriguez · Juan Ramón Ríos · Daniel Álvarez · Carlos del Hoyo</div></div></div>
+    <div class="row"><div class="row-l"><div class="row-title">Ismael Fernandez · David del Castillo · Rafaela Borba · Kamal Addi · Rafael Bernal</div></div></div>
+  </div></div>
+</div>
+
+<!-- ═══ BANCO DE ESPAÑA ═══ -->
+<div class="pane" id="pane-bancoespana">
+  <div class="topbar"><div><div class="page-title">Banco de España</div><div class="page-sub">Smart Evolution · Javier Decena</div></div><span class="badge b-red">ROJO · Cierre miércoles</span></div>
+  <div class="alert alert-red"><div class="alert-title">Cierre este miércoles — Saúl y Javier Decena deben decidir qué app migrar</div><div class="alert-sub">4 apps disponibles · 15.000€ · objetivo septiembre · IA + Java · bloqueado en su decisión</div></div>
+  <div class="section-hdr">Estado</div>
+  <div class="card"><div class="card-body">
+    <div class="row"><div class="row-l"><div class="row-title">4 apps disponibles · elegir 1</div><div class="row-sub">Saúl + Javier Decena deciden · Smart Evolution · migraciones</div></div><span class="badge b-red">Cierre miércoles</span></div>
+    <div class="row"><div class="row-l"><div class="row-title">Presupuesto</div></div><b>15.000€</b></div>
+    <div class="row"><div class="row-l"><div class="row-title">Objetivo</div></div><b>Septiembre 2026</b></div>
+    <div class="row"><div class="row-l"><div class="row-title">Stack</div></div><span class="badge b-blue">IA + Java</span></div>
+  </div></div>
+  <div class="section-hdr">También · Maphre</div>
+  <div class="card"><div class="card-body">
+    <div class="row"><div class="row-l"><div class="row-title">PoC no cerrada por cliente · pocas horas/mes</div><div class="row-sub">Enrique López · en seguimiento</div></div><span class="badge b-gray">Seguimiento</span></div>
   </div></div>
 </div>
 
