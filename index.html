@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Diario · Hiberus Banca</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><rect width=%2232%22 height=%2232%22 rx=%226%22 fill=%22%230D2233%22/><text x=%2216%22 y=%2222%22 font-family=%22Arial%22 font-weight=%22800%22 font-size=%2218%22 fill=%22white%22 text-anchor=%22middle%22>h</text><circle cx=%2224%22 cy=%229%22 r=%223%22 fill=%22%2300C6FF%22/></svg>">
+<style>
+:root{
+  --navy:#0D2233;--slate:#1C3347;--steel:#2C4A6E;
+  --red-dark:#7B1818;--red-mid:#C0392B;--red-bg:#FBEAEA;
+  --amber-dark:#6B2D00;--amber-mid:#C0620A;--amber-bg:#FEF0DC;
+  --green-dark:#0F3D22;--green-mid:#1A6B3A;--green-bg:#E3F5EB;
+  --blue-dark:#0D2F50;--blue-mid:#1A6BAA;--blue-bg:#E4EEF8;
+  --gray-dark:#2E2E2E;--gray-mid:#888888;--gray-bg:#EFEFEB;
+  --purple-dark:#3C3489;--purple-mid:#534AB7;--purple-bg:#EEEDFE;
+  --bg:#F4F6F9;--surface:#FFFFFF;--border:#E2E6EA;--border2:#CBD2DA;
+  --text:#111827;--text2:#6B7280;--text3:#9CA3AF;
+  --r:10px;--r-sm:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{background:var(--navy);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sb-logo{padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sb-logo-wordmark{display:flex;align-items:center;gap:0;margin-bottom:8px;}
+.sb-logo-h{font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.5px;}
+.sb-logo-dot{width:7px;height:7px;background:#00C6FF;border-radius:50%;margin-bottom:2px;margin-left:1px;}
+.sb-logo-tag{font-size:11px;font-weight:600;color:rgba(255,255,255,.35);letter-spacing:.12em;text-transform:uppercase;margin-top:1px;}
+.sb-logo-panel{font-size:13px;font-weight:700;color:#00C6FF;margin-top:6px;letter-spacing:.01em;}
+.sb-section{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:rgba(255,255,255,.25);padding:14px 16px 5px;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 16px;cursor:pointer;color:rgba(255,255,255,.55);transition:all .15s;border-left:3px solid transparent;font-size:12px;font-weight:500;}
+.sb-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+.sb-item.active{background:rgba(255,255,255,.09);color:#fff;border-left-color:#00C6FF;}
+.sb-icon{font-size:14px;width:16px;text-align:center;flex-shrink:0;}
+.sb-badge{margin-left:auto;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;}
+.sb-badge.red{background:var(--red-mid);color:#fff;}
+.sb-badge.amber{background:var(--amber-mid);color:#fff;}
+.sb-badge.blue{background:#00C6FF;color:var(--navy);}
+.sb-footer{margin-top:auto;padding:14px 16px;border-top:1px solid rgba(255,255,255,.08);}
+.sb-footer-text{font-size:10px;color:rgba(255,255,255,.25);line-height:1.7;}
+.sb-link{display:flex;align-items:center;gap:8px;padding:6px 16px;cursor:pointer;color:rgba(255,255,255,.4);font-size:11px;transition:all .15s;}
+.sb-link:hover{color:rgba(255,255,255,.8);}
+
+/* MAIN */
+.main{padding:24px;overflow-y:auto;}
+.pane{display:none;}
+.pane.active{display:flex;flex-direction:column;gap:16px;}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.page-title{font-size:22px;font-weight:700;color:var(--text);}
+.page-sub{font-size:12px;color:var(--text2);margin-top:3px;}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;}
+.m-label{font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+.m-val{font-size:28px;font-weight:700;color:var(--text);line-height:1;}
+.m-sub{font-size:11px;color:var(--text3);margin-top:4px;}
+.m-red .m-val{color:var(--red-dark);}
+.m-amber .m-val{color:var(--amber-dark);}
+.m-green .m-val{color:var(--green-dark);}
+
+/* ALERTS — clickables */
+.alerts-grid{display:flex;flex-direction:column;gap:8px;}
+.alert{border-left:4px solid;padding:10px 14px;border-radius:0 var(--r-sm) var(--r-sm) 0;transition:filter .15s;}
+.alert.clickable{cursor:pointer;}
+.alert.clickable:hover{filter:brightness(.96);box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);}
+.alert-red{border-color:var(--red-mid);background:var(--red-bg);}
+.alert-amber{border-color:var(--amber-mid);background:var(--amber-bg);}
+.alert-blue{border-color:var(--blue-mid);background:var(--blue-bg);}
+.alert-green{border-color:var(--green-mid);background:var(--green-bg);}
+.alert-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.alert-title{font-size:12px;font-weight:700;color:var(--text);}
+.alert-link-hint{font-size:10px;font-weight:600;color:var(--blue-mid);white-space:nowrap;flex-shrink:0;margin-top:1px;}
+.alert-red .alert-link-hint{color:var(--red-mid);}
+.alert-amber .alert-link-hint{color:var(--amber-mid);}
+.alert-sub{font-size:11px;color:var(--text2);margin-top:3px;line-height:1.5;}
+.alert-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;}
+
+/* BADGES */
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;}
+.b-red{background:var(--red-bg);color:var(--red-dark);border:1px solid var(--red-mid);}
+.b-amber{background:var(--amber-bg);color:var(--amber-dark);border:1px solid var(--amber-mid);}
+.b-green{background:var(--green-bg);color:var(--green-dark);border:1px solid var(--green-mid);}
+.b-blue{background:var(--blue-bg);color:var(--blue-dark);border:1px solid var(--blue-mid);}
+.b-gray{background:var(--gray-bg);color:var(--gray-dark);border:1px solid var(--gray-mid);}
+.b-purple{background:var(--purple-bg);color:var(--purple-dark);border:1px solid var(--purple-mid);}
+.b-navy{background:var(--navy);color:#fff;}
+.b-cyan{background:#E0F9FF;color:#005A72;border:1px solid #00C6FF;}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.card-header{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.card-title{font-size:13px;font-weight:700;color:var(--text);flex:1;}
+.card-sub{font-size:11px;color:var(--text2);}
+.card-body{padding:12px 16px;}
+.card-urgent{border:2px solid var(--red-mid);}
+
+/* ROWS */
+.row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.row:last-child{border-bottom:none;}
+.row-l{flex:1;}
+.row-title{font-size:12px;font-weight:600;color:var(--text);}
+.row-sub{font-size:11px;color:var(--text2);margin-top:1px;}
+.row-r{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+
+/* GRID */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* PEOPLE */
+.person-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.person-row:last-child{border-bottom:none;}
+.avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.av-blue{background:var(--blue-bg);color:var(--blue-dark);}
+.av-green{background:var(--green-bg);color:var(--green-dark);}
+.av-amber{background:var(--amber-bg);color:var(--amber-dark);}
+.av-red{background:var(--red-bg);color:var(--red-dark);}
+.av-gray{background:var(--gray-bg);color:var(--gray-dark);}
+.av-navy{background:var(--navy);color:#fff;}
+.av-purple{background:var(--purple-bg);color:var(--purple-dark);}
+.person-name{font-size:12px;font-weight:700;color:var(--text);}
+.person-detail{font-size:11px;color:var(--text2);margin-top:1px;}
+
+/* CHECKLIST */
+.check-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);cursor:pointer;}
+.check-row:last-child{border-bottom:none;}
+.check-row:hover{opacity:.85;}
+.checkbox{width:18px;height:18px;border-radius:4px;border:2px solid var(--border2);background:var(--surface);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px;transition:all .15s;}
+.checkbox.done{background:var(--navy);border-color:var(--navy);}
+.check-tick{display:none;color:#fff;font-size:11px;font-weight:800;}
+.checkbox.done .check-tick{display:block;}
+.check-label{font-size:12px;font-weight:500;color:var(--text);flex:1;line-height:1.5;}
+.check-label.done{text-decoration:line-through;color:var(--text3);}
+.check-meta{font-size:10px;color:var(--text3);margin-top:2px;}
+
+/* SECTION HEADER */
+.section-hdr{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);margin-bottom:8px;}
+
+/* DOT */
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+
+/* ORG */
+.org-node{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r-sm);margin-bottom:4px;}
+.org-1{background:var(--navy);}
+.org-2{background:var(--slate);}
+.org-you{background:#FEF3DC;border:2px solid var(--amber-mid);}
+.org-ref{background:var(--gray-bg);border:1px solid var(--border2);}
+.org-node-name{font-size:12px;font-weight:700;}
+.org-node-role{font-size:11px;opacity:.75;margin-top:1px;}
+.org-white .org-node-name,.org-white .org-node-role{color:#fff;}
+.org-white .org-node-role{opacity:.6;}
+.org-indent{margin-left:24px;border-left:2px solid var(--border);padding-left:16px;margin-top:4px;margin-bottom:4px;}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);}
+td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+
+/* TOTAL */
+.total-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:2px solid var(--border);margin-top:6px;}
+.total-label{font-size:14px;font-weight:700;}
+.total-val{font-size:20px;font-weight:800;color:var(--navy);}
+
+/* HIGHLIGHT */
+.highlight{background:var(--red-bg);border:1px solid var(--red-mid);border-radius:var(--r-sm);padding:8px 12px;margin-bottom:8px;}
+.highlight-text{font-size:12px;font-weight:700;color:var(--red-dark);}
+.highlight-sub{font-size:11px;color:var(--red-mid);margin-top:2px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-wordmark">
+      <span class="sb-logo-h">hiberus</span><div class="sb-logo-dot"></div>
+    </div>
+    <div class="sb-logo-tag">Banca y Seguros</div>
+    <div class="sb-logo-panel">Panel diario</div>
+  </div>
+
+  <div class="sb-section">Hoy</div>
+  <div class="sb-item active" onclick="nav(this,'alertas')"><span class="sb-icon">🔔</span>Alertas del día<span class="sb-badge red">8</span></div>
+  <div class="sb-item" onclick="nav(this,'cierre')"><span class="sb-icon">📅</span>Cierre de mes<span class="sb-badge amber">7d</span></div>
+
+  <div class="sb-section">Proyectos</div>
+  <div class="sb-item" onclick="nav(this,'proyectos')"><span class="sb-icon">📁</span>Todos mis proyectos</div>
+  <div class="sb-item" onclick="nav(this,'sanitas')"><span class="sb-icon">🏥</span>Sanitas · Healthy Cities<span class="sb-badge red">!</span></div>
+  <div class="sb-item" onclick="nav(this,'caixa')"><span class="sb-icon">📐</span>Caixa · Tallas apps</div>
+  <div class="sb-item" onclick="nav(this,'bbva')"><span class="sb-icon">💼</span>BBVA · Code2Doc + Squad</div>
+
+  <div class="sb-section">Personas</div>
+  <div class="sb-item" onclick="nav(this,'personas')"><span class="sb-icon">👥</span>Recursos y staffing<span class="sb-badge red">6</span></div>
+
+  <div class="sb-section">Organización</div>
+  <div class="sb-item" onclick="nav(this,'orgchart')"><span class="sb-icon">🏢</span>Organigrama Hiberus</div>
+  <div class="sb-item" onclick="nav(this,'contactos')"><span class="sb-icon">📇</span>Contactos clave</div>
+
+  <div class="sb-section">Herramientas</div>
+  <div class="sb-link" onclick="window.open('https://kvpproject.hiberus.com/imputar-partes')"><span class="sb-icon">⏱</span>KVP · Imputar horas</div>
+  <div class="sb-link" onclick="window.open('https://hexperience.hiberus.com/login')"><span class="sb-icon">👤</span>Hiberus Experience</div>
+  <div class="sb-link" onclick="window.open('https://hiberus.kymatio.com/')"><span class="sb-icon">🔒</span>Kymatio</div>
+  <div class="sb-link" onclick="window.open('https://moodlems.demohiberus.com/')"><span class="sb-icon">📚</span>Moodle Microservicios</div>
+
+  <div class="sb-footer">
+    <div class="sb-footer-text">Actualizado: 23 jun 2026<br>jriveiro@hiberus.com</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ═══ ALERTAS ═══ -->
+<div class="pane active" id="pane-alertas">
+  <div class="topbar">
+    <div><div class="page-title">Alertas del día</div><div class="page-sub">Martes 23 junio 2026 · haz clic en cada alerta para ir al detalle</div></div>
+    <span class="badge b-red" style="font-size:12px;padding:5px 12px;">7 días para cierre de mes</span>
+  </div>
+
+  <div class="metrics">
+    <div class="metric m-red"><div class="m-label">Críticas hoy</div><div class="m-val">5</div><div class="m-sub">no pueden esperar</div></div>
+    <div class="metric m-amber"><div class="m-label">Sin cubrir</div><div class="m-val">6</div><div class="m-sub">posiciones urgentes</div></div>
+    <div class="metric"><div class="m-label">Facturación jun</div><div class="m-val">299K€</div><div class="m-sub">estimado · 8 proyectos</div></div>
+    <div class="metric m-green"><div class="m-label">Mi área</div><div class="m-val">40</div><div class="m-sub">personas · Banca y Seguros</div></div>
+  </div>
+
+  <div class="section-hdr">Crítico — hoy mismo</div>
+  <div class="alerts-grid">
+
+    <div class="alert alert-red clickable" onclick="goTo('sanitas')">
+      <div class="alert-header"><div class="alert-title">Sanitas · Healthy Cities — arquitecto Java/SpringBoot urgente</div><div class="alert-link-hint">Ver proyecto →</div></div>
+      <div class="alert-sub">Luis Fernández CONFIRMADO como Tech Lead desde el 6 julio · cubre el rol de arquitecto al inicio · buscar arquitecto externo (55K) en paralelo · proceso selección ya (15 días preaviso) · código proyecto pendiente</div>
+      <div class="alert-tags"><span class="badge b-red">Kickoff 6 jul</span><span class="badge b-red">Arquitecto Java/SB</span><span class="badge b-red">Sin código</span><span class="badge b-amber">Esperando Verónica</span></div>
+    </div>
+
+    <div class="alert alert-red clickable" onclick="goTo('proyectos')">
+      <div class="alert-header"><div class="alert-title">Copernicus F1 — entrega 30 junio · 7 días</div><div class="alert-link-hint">Ver proyectos →</div></div>
+      <div class="alert-sub">Confirmar estado con Juan Luis Deza hoy · empresa de recobro · .NET · sin margen de error</div>
+      <div class="alert-tags"><span class="badge b-red">30 jun · 7 días</span><span class="badge b-red">Juan Luis Deza</span></div>
+    </div>
+
+    <div class="alert alert-red clickable" onclick="goTo('personas')">
+      <div class="alert-header"><div class="alert-title">Santander — 2 bajas el 1 julio · Java/SpringBoot</div><div class="alert-link-hint">Ver staffing →</div></div>
+      <div class="alert-sub">Hablar con Natalia Lirón hoy · identificar perfiles · arrancar búsqueda · 7 días</div>
+      <div class="alert-tags"><span class="badge b-red">1 jul · 7 días</span><span class="badge b-red">2 perfiles Java</span></div>
+    </div>
+
+    <div class="alert alert-red clickable" onclick="goTo('proyectos')">
+      <div class="alert-header"><div class="alert-title">Banco de España — cierre este miércoles</div><div class="alert-link-hint">Ver proyectos →</div></div>
+      <div class="alert-sub">Saúl y Javier Decena deben decidir qué app migrar · 4 apps disponibles · 15.000€ · objetivo septiembre</div>
+      <div class="alert-tags"><span class="badge b-red">Miércoles</span><span class="badge b-amber">Bloqueado por Saúl</span></div>
+    </div>
+
+    <div class="alert alert-red clickable" onclick="goTo('cierre')">
+      <div class="alert-header"><div class="alert-title">KVP — imputar horas y previsión fin de mes</div><div class="alert-link-hint">Ver cierre mes →</div></div>
+      <div class="alert-sub">Semana 3 = previsión obligatoria hasta el 30 junio · sin esto el proyecto no factura</div>
+      <div class="alert-tags"><span class="badge b-red">Hoy</span><span class="badge b-blue">kvpproject.hiberus.com</span></div>
+    </div>
+  </div>
+
+  <div class="section-hdr">Urgente — esta semana</div>
+  <div class="alerts-grid">
+
+    <div class="alert alert-amber clickable" onclick="goTo('personas')">
+      <div class="alert-header"><div class="alert-title">Jahiro Álvarez · OpenBank — ¿firmó contrato?</div><div class="alert-link-hint">Ver staffing →</div></div>
+      <div class="alert-sub">Entra 6 julio · confirmar SBA · alta MTE · 2 equipos Mac+Hiberus · 60€/h</div>
+      <div class="alert-tags"><span class="badge b-amber">6 jul</span><span class="badge b-amber">SBA pendiente</span><span class="badge b-amber">MTE + equipos</span></div>
+    </div>
+
+    <div class="alert alert-amber clickable" onclick="goTo('bbva')">
+      <div class="alert-header"><div class="alert-title">BBVA Code2Doc — DevOps Tandazo sin confirmar · arranca 1 julio</div><div class="alert-link-hint">Ver BBVA →</div></div>
+      <div class="alert-sub">Confirmar con Verónica Sánchez Medero · Luis Rodríguez y Saúl confirmados</div>
+      <div class="alert-tags"><span class="badge b-amber">1 jul</span><span class="badge b-red">Tandazo ??</span></div>
+    </div>
+
+    <div class="alert alert-amber clickable" onclick="goTo('caixa')">
+      <div class="alert-header"><div class="alert-title">Alta Carles Contell en MTE · Caixa Isla Indra</div><div class="alert-link-hint">Ver Caixa →</div></div>
+      <div class="alert-sub">No puede imputar horas · Sergio no lo hizo · hacerlo tú · preguntar a Bea Aranda cómo se da de alta</div>
+      <div class="alert-tags"><span class="badge b-amber">Esta semana</span><span class="badge b-amber">MTE pendiente</span></div>
+    </div>
+
+    <div class="alert alert-amber clickable" onclick="goTo('caixa')">
+      <div class="alert-header"><div class="alert-title">Caixa Isla Indra — pedir acceso al Jira de Carlos Zapata</div><div class="alert-link-hint">Ver Caixa →</div></div>
+      <div class="alert-sub">Zapata creó el Jira para control de costes · deadline julio · Carles de vacaciones · Luis Novoa cubre</div>
+      <div class="alert-tags"><span class="badge b-amber">Esta semana</span><span class="badge b-amber">Sin acceso Jira</span></div>
+    </div>
+
+    <div class="alert alert-blue clickable" onclick="goTo('cierre')">
+      <div class="alert-header"><div class="alert-title">Evidencias junio — empezar a anotar tareas ya</div><div class="alert-link-hint">Ver cierre mes →</div></div>
+      <div class="alert-sub">Email a Bea Aranda antes del 15 julio · es tu primer envío · tareas de desarrollo/análisis</div>
+      <div class="alert-tags"><span class="badge b-blue">Antes 15 jul</span><span class="badge b-blue">Primer envío</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PROYECTOS ═══ -->
+<div class="pane" id="pane-proyectos">
+  <div class="topbar"><div><div class="page-title">Todos mis proyectos</div><div class="page-sub">Banca · Servicios Financieros · Seguros</div></div></div>
+  <div class="metrics">
+    <div class="metric m-red"><div class="m-label">Críticos</div><div class="m-val">3</div><div class="m-sub">Copernicus · Santander · Sanitas</div></div>
+    <div class="metric m-amber"><div class="m-label">Arrancan julio</div><div class="m-val">5</div><div class="m-sub">BBVA Code2Doc · Squad · más</div></div>
+    <div class="metric m-green"><div class="m-label">Estables</div><div class="m-val">3</div><div class="m-sub">Ibercaja · OpenBank · March</div></div>
+    <div class="metric"><div class="m-label">Pipeline</div><div class="m-val">4</div><div class="m-sub">Banco España · GND · más</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:#E24B4A;"></div><div style="flex:1"><div class="card-title">Santander</div><div class="card-sub">2023-19139 · Natalia Lirón</div></div><span class="badge b-amber">ÁMBAR</span></div>
+      <div class="card-body">
+        <div class="row"><div class="row-l"><div class="row-title">Microservicios · 11 recursos · ~64K€/mes</div><div class="row-sub">Java/SpringBoot · tarifas antiguas</div></div><span class="badge b-red">2 bajas 1 jul</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">Alemania · Migración APIs · 2026-37822</div><div class="row-sub">Héctor Villena JP · entrega parcial julio</div></div><span class="badge b-amber">Cierra jul</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">Struts → SpringBoot · Assessment</div><div class="row-sub">Saúl + Luis Novoa · falta decisión cliente</div></div><span class="badge b-gray">Pendiente</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">GND · Pipeline · 60K</div></div><span class="badge b-purple">Pipeline</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:#EF9F27;"></div><div style="flex:1"><div class="card-title">OpenBank</div><div class="card-sub">2023-20669 · Felipe + Álvaro Alcay</div></div><span class="badge b-amber">ÁMBAR</span></div>
+      <div class="card-body">
+        <div class="row"><div class="row-l"><div class="row-title">Microservicios · 9+2 recursos · ~66K€/mes</div><div class="row-sub">Doble coste Mac+Hiberus · lleva 2-3 años</div></div><span class="badge b-green">Activo</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">Yoan Marin</div><div class="row-sub">Entra 29 junio · interno recolocado</div></div><span class="badge b-green">Confirmado</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">Jahiro Álvarez</div><div class="row-sub">Entra 6 julio · 60€/h · ¿firmó contrato?</div></div><span class="badge b-red">Pendiente SBA</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:#378ADD;"></div><div style="flex:1"><div class="card-title">BBVA</div><div class="card-sub">Verónica Sánchez Medero</div></div><span class="badge b-amber">ÁMBAR</span></div>
+      <div class="card-body">
+        <div class="row"><div class="row-l"><div class="row-title">Microservicios · 2026-37967</div><div class="row-sub">Cristo + Camilo · Trading + nueva app + SQUAD SDD</div></div><span class="badge b-green">Activo</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">Code2Doc · 39.600€ · 3 meses</div><div class="row-sub">Saúl (Arq) · Luis R. (IA) · Tandazo?? (DevOps)</div></div><span class="badge b-red">1 jul · falta DevOps</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">Squad IA · 28.725€ · 3 meses</div><div class="row-sub">Luis (Arq) · Javier Toro + Carmen Sirgo</div></div><span class="badge b-amber">1 jul · confirmar</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">Cecabank · Arquitecto Plataforma</div><div class="row-sub">Verónica Encinas · arranca julio</div></div><span class="badge b-red">Sin candidato</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:#1D9E75;"></div><div style="flex:1"><div class="card-title">Caixa</div><div class="card-sub">Adrián Esteban Molina · Zapata (cliente)</div></div><span class="badge b-amber">ÁMBAR</span></div>
+      <div class="card-body">
+        <div class="row"><div class="row-l"><div class="row-title">Isla Indra · PoC 5 apps · 2026-39353</div><div class="row-sub">Luis Novoa cubre a Carles · Jira Zapata: pedir acceso</div></div><span class="badge b-red">Deadline jul</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">Copernicus F1 · 2026-37237</div><div class="row-sub">Juan Luis Deza · .NET · entrega 30 junio</div></div><span class="badge b-red">Entrega 30 jun</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">Copernicus F2 · Evolutivo</div><div class="row-sub">Patricia + Rodolfo · Juan Luis → Nordex</div></div><span class="badge b-blue">Arranca jul</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">Copernicus Kepler · Pipeline</div></div><span class="badge b-purple">Pipeline</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:#7F77DD;"></div><div style="flex:1"><div class="card-title">Banca March / nCino</div><div class="card-sub">Javier Hernaiz Gutiérrez · Madrid</div></div><span class="badge b-green">VERDE</span></div>
+      <div class="card-body">
+        <div class="row"><div class="row-l"><div class="row-title">Analista Orgánico Java · 2026-37277</div><div class="row-sub">Miguel Angel Lopez · 48,67€/h · 1er mes free</div></div><span class="badge b-green">Activo</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">nCino · Bernardo Martinez · 2026-39683</div><div class="row-sub">60€/h · margen 42% · entra 6 julio · alta MTE pdte.</div></div><span class="badge b-blue">Entra 6 jul</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">2ª posición · Salesforce</div><div class="row-sub">Área Laura/Thania · sin candidato</div></div><span class="badge b-red">Sin candidato</span></div>
+      </div>
+    </div>
+    <div class="card card-urgent">
+      <div class="card-header"><div class="dot" style="background:#E24B4A;"></div><div style="flex:1"><div class="card-title">Sanitas · Healthy Cities</div><div class="card-sub">Francisco Herrera (JP) · kickoff 6 jul</div></div><span class="badge b-red">URGENTE</span></div>
+      <div class="card-body">
+        <div class="highlight"><div class="highlight-text">Kickoff 6 julio · Java+SpringBoot · sin arquitecto no arranca · esperando a Verónica</div></div>
+        <div class="row"><div class="row-l"><div class="row-title">400K€ · 9m+2m España+2m LATAM+Turquía</div><div class="row-sub">Puesta en prod: abril 2027 · con IA: 7,5 meses</div></div><span class="badge b-red">Sin cód. proyecto</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">Arquitecto + Sr + 2 Middle · Java/SpringBoot</div><div class="row-sub">Sin cubrir · 13 días para kickoff</div></div><span class="badge b-red">Sin cubrir</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">Riesgo: sin figmas no arranca desarrollo</div></div><span class="badge b-amber">Vigilar</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:#888780;"></div><div style="flex:1"><div class="card-title">Ibercaja Bambú</div><div class="card-sub">2025-35203 · Ignacio Carcas</div></div><span class="badge b-green">VERDE</span></div>
+      <div class="card-body">
+        <div class="row"><div class="row-l"><div class="row-title">9 recursos activos · ~95K€/mes</div><div class="row-sub">Estable · reunión jueves con Ignacio Carcas</div></div><span class="badge b-green">Estable</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="dot" style="background:#D85A30;"></div><div style="flex:1"><div class="card-title">Banco de España + Maphre</div><div class="card-sub">Javier Decena · Enrique López</div></div><span class="badge b-red">ROJO</span></div>
+      <div class="card-body">
+        <div class="row"><div class="row-l"><div class="row-title">Smart Evolution · 4 apps · 15.000€</div><div class="row-sub">Saúl+Decena deciden app · objetivo septiembre</div></div><span class="badge b-red">Cierre miércoles</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">Maphre · PoC</div><div class="row-sub">No cerrada por cliente · pocas horas/mes</div></div><span class="badge b-gray">Seguimiento</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="section-hdr" style="margin-top:4px;">Pipeline</div>
+  <div class="card"><div class="card-body">
+    <div class="row"><div class="row-l"><div class="row-title">Santander GND · 60K</div></div><span class="badge b-purple">Pipeline</span></div>
+    <div class="row"><div class="row-l"><div class="row-title">Copernicus Kepler</div></div><span class="badge b-purple">Pipeline</span></div>
+    <div class="row"><div class="row-l"><div class="row-title">Fundación Caixa · Assessment 3 sem · 5.900€</div><div class="row-sub">Saúl/Adrián · para plantear migración</div></div><span class="badge b-purple">Pipeline</span></div>
+    <div class="row"><div class="row-l"><div class="row-title">BBVA / Banco España / Caixa F. / Cecabank · pipeline Sergio</div></div><span class="badge b-purple">Pipeline</span></div>
+  </div></div>
+</div>
+
+<!-- ═══ SANITAS ═══ -->
+<div class="pane" id="pane-sanitas">
+  <div class="topbar">
+    <div><div class="page-title">Sanitas · Healthy Cities</div><div class="page-sub">Java + SpringBoot · kickoff 6 julio</div></div>
+    <span class="badge b-red" style="font-size:12px;padding:5px 14px;">13 días para kickoff</span>
+  </div>
+  <div class="highlight"><div class="highlight-text">Luis Fernández CONFIRMADO como Tech Lead desde el 6 julio · cubre arquitectura al inicio · buscar arquitecto externo 55K ya (15 días preaviso) · código proyecto pendiente</div></div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Datos del proyecto</div></div>
+      <div class="card-body">
+        <div class="row"><div class="row-l"><div class="row-title">Nombre</div></div><b>Healthy Cities</b></div>
+        <div class="row"><div class="row-l"><div class="row-title">Stack técnico</div></div><span class="badge b-blue">Java + SpringBoot</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">Código proyecto</div></div><span class="badge b-red">PENDIENTE · pedir HOY</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">Presupuesto</div></div><b style="font-size:15px;">400.000€</b></div>
+        <div class="row"><div class="row-l"><div class="row-title">Duración</div><div class="row-sub">9m desarrollo + 2m soporte España + 2m LATAM + Turquía</div></div></div>
+        <div class="row"><div class="row-l"><div class="row-title">Kickoff microservicios</div></div><span class="badge b-red">6 julio 2026</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">Producción estimada</div></div><b>Abril 2027 · con IA: 7,5m</b></div>
+        <div class="row"><div class="row-l"><div class="row-title">Qué es</div><div class="row-sub">App métricas salud: actividad física, retos, zonas verdes · Back + Front + Mobile</div></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Equipo</div></div>
+      <div class="card-body">
+        <div class="person-row"><div class="avatar av-blue">FH</div><div><div class="person-name">Francisco Herrera</div><div class="person-detail">Jefe de Proyecto · coordina el trabajo</div></div></div>
+        <div class="person-row"><div class="avatar av-blue">JC</div><div><div class="person-name">Juan Carlos Caballero Padrino</div><div class="person-detail">Director de Proyecto</div></div></div>
+        <div class="person-row"><div class="avatar av-gray">EL</div><div><div class="person-name">Enrique López Ayala</div><div class="person-detail">Mercado</div></div></div>
+        <div class="person-row"><div class="avatar av-navy">SG</div><div><div class="person-name">Sergio Gil García</div><div class="person-detail">Microservicios · tu manager</div></div></div>
+        <div class="person-row"><div class="avatar av-amber">LF</div><div><div class="person-name">Luis Fernández</div><div class="person-detail">Tech Lead CONFIRMADO desde el 6 julio · Valencia · cubre hasta que llegue arquitecto externo</div></div></div>
+        <div class="person-row"><div class="avatar av-gray">JU</div><div><div class="person-name">José Urbano</div><div class="person-detail">Líder QA · QA es Hiberus · ciber es Sanitas</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="section-hdr">Perfiles a buscar · Java + SpringBoot · urgente antes del 6 julio</div>
+  <div class="card"><div class="card-body">
+    <div class="row"><div class="row-l"><div class="row-title">Arquitecto Backend Java/SpringBoot</div><div class="row-sub">Crítico · sin esto no arranca · consultado a Verónica · pendiente respuesta</div></div><span class="badge b-red">HOY · crítico</span></div>
+    <div class="row"><div class="row-l"><div class="row-title">Desarrollador Backend Senior · Java/SpringBoot · ~45K</div></div><span class="badge b-red">Urgente</span></div>
+    <div class="row"><div class="row-l"><div class="row-title">Desarrolladores Backend Middle × 2 · Java/SpringBoot · ~25,2K</div><div class="row-sub">Perfiles confirmados tras reunión de hoy</div></div><span class="badge b-amber">Confirmando</span></div>
+    <div class="row"><div class="row-l"><div class="row-title">Tech Lead · si Luis Fernández no puede</div></div><span class="badge b-amber">Por confirmar</span></div>
+  </div></div>
+  <div class="section-hdr">Pendientes críticos</div>
+  <div class="alerts-grid">
+    <div class="alert alert-red"><div class="alert-title">Código de proyecto — sin código no hay MTE</div><div class="alert-sub">Pedir a partir del código de mercado · a Bea Aranda o Enrique López en la reunión</div></div>
+    <div class="alert alert-red"><div class="alert-title">Sin figmas no arranca el desarrollo · premisa bloqueante</div><div class="alert-sub">Confirmar con Sanitas cuándo estarán · riesgo principal del proyecto</div></div>
+    <div class="alert alert-amber"><div class="alert-title">Coste IA diferente al actual — alinear con Sergio</div><div class="alert-sub">El coste de IA del momento era diferente · revisar antes de presupuestar</div></div>
+  </div>
+</div>
+
+<!-- ═══ BBVA ═══ -->
+<div class="pane" id="pane-bbva">
+  <div class="topbar"><div><div class="page-title">BBVA · Code2Doc + Squad IA</div><div class="page-sub">Arrancan 1 julio · Verónica Sánchez Medero</div></div></div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Code2Doc</div><div class="card-sub">39.600€ · 3 meses</div></div>
+      <div class="card-body">
+        <div class="row"><div class="row-l"><div class="row-title">0,5 Arquitecto · 1 mes · 65€/h · Saúl</div></div><span class="badge b-green">5.200€ ✓</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">1 DevOps · 1 mes · 65€/h · Tandazo??</div></div><span class="badge b-red">10.400€ · sin conf.</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">1 Ing. IA · 3 meses · 50€/h · Luis Rodríguez</div></div><span class="badge b-green">24.000€ ✓</span></div>
+        <div class="total-row"><div class="total-label">Total Code2Doc</div><div class="total-val">39.600€</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Squad IA</div><div class="card-sub">28.725€ · 3 meses</div></div>
+      <div class="card-body">
+        <div class="row"><div class="row-l"><div class="row-title">0,5 Arq/IA Driver · 3m · 65€/h · LUIS</div><div class="row-sub">Base 75h/mes a confirmar con RRHH</div></div><span class="badge b-green">14.625€ ✓</span></div>
+        <div class="row"><div class="row-l"><div class="row-title">2 Devs IA · 1 mes · 47€/h · Javier Toro + Carmen Sirgo</div><div class="row-sub">Entran último mes · Javier libre 1 jul · Carmen sale Santander</div></div><span class="badge b-amber">14.100€ · conf.</span></div>
+        <div class="total-row"><div class="total-label">Total Squad IA</div><div class="total-val">28.725€</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="alert alert-amber"><div class="alert-title">Base horaria 75h vs 80h · diferencia ~1.915€ en Squad IA · confirmar con RRHH antes de presentar a BBVA</div></div>
+  <div class="section-hdr" style="margin-top:4px;">BBVA Microservicios · 2026-37967</div>
+  <div class="card"><div class="card-body">
+    <div class="row"><div class="row-l"><div class="row-title">Cristo Fernando Lopez + Camilo Bolívar · activos</div><div class="row-sub">Trading · nueva app pedida · montar SQUAD con SDD</div></div><span class="badge b-green">Activo</span></div>
+    <div class="row"><div class="row-l"><div class="row-title">Brian Camilo Bolívar</div><div class="row-sub">Pendiente fecha entrevista banco · trámite PAC</div></div><span class="badge b-amber">Entrevista pdte.</span></div>
+    <div class="row"><div class="row-l"><div class="row-title">Cecabank · Arquitecto Plataforma · 2026-37965</div><div class="row-sub">Verónica Encinas · arranca julio · sin candidato</div></div><span class="badge b-red">Sin candidato</span></div>
+  </div></div>
+</div>
+
+<!-- ═══ CAIXA ═══ -->
+<div class="pane" id="pane-caixa">
+  <div class="topbar"><div><div class="page-title">Caixa · Modelo de tallas</div><div class="page-sub">PoC 5 apps → 300 migraciones · Carlos Zapata Ferrer</div></div></div>
+  <div class="alert alert-amber"><div class="alert-title">Costes NO se dan hasta terminar la PoC · deadline julio · Carles de vacaciones · Luis Novoa cubre · pedir acceso Jira Zapata · alta Carles en MTE pendiente</div></div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Estrategia</div></div>
+      <div class="card-body">
+        <div class="row"><div class="row-l"><div class="row-title">PoC actual</div></div><div>5 apps · 2026-39353 · padre 2026-39220</div></div>
+        <div class="row"><div class="row-l"><div class="row-title">Objetivo</div></div><b>300 migraciones Caixa Tech</b></div>
+        <div class="row"><div class="row-l"><div class="row-title">Modelo cobro</div></div><b>Tallas S / M / L / XL</b></div>
+        <div class="row"><div class="row-l"><div class="row-title">Margen PoC</div></div><b>25% sobre coste (Sergio)</b></div>
+        <div class="row"><div class="row-l"><div class="row-title">Si PoC OK</div></div><b>Migración total septiembre 2026</b></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Calculadora margen PoC</div></div>
+      <div class="card-body">
+        <div style="margin-bottom:12px;">
+          <label style="font-size:11px;color:var(--text2);font-weight:600;display:block;margin-bottom:6px;">Coste real PoC (€) — rellenar al terminar</label>
+          <input type="number" id="coste-poc" value="0" oninput="calcPoc()" style="width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:15px;font-weight:700;color:var(--text);">
+        </div>
+        <div class="row"><div class="row-l"><div class="row-title">+ 25% margen</div></div><b id="p25">0€</b></div>
+        <div class="row"><div class="row-l"><div class="row-title">Precio con 25%</div></div><b id="precio25" style="color:var(--green-dark);">0€</b></div>
+        <div class="row"><div class="row-l"><div class="row-title">Precio con 35% (Sergio)</div></div><b id="precio35" style="color:var(--navy);">0€</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="section-hdr">5 apps · tabla Zapata</div>
+  <div class="card"><div class="card-body">
+    <table>
+      <thead><tr><th>Aplicación</th><th>Origen</th><th>Destino</th><th>Horas IA</th><th>Horas FTE</th><th>Talla</th></tr></thead>
+      <tbody>
+        <tr><td><b>EXTH - Histórico Extranjero</b></td><td>Visual Basic 6</td><td style="color:var(--text3);">Pendiente</td><td style="color:var(--text3);">—</td><td style="color:var(--text3);">—</td><td><span class="badge b-amber">Por tallar</span></td></tr>
+        <tr><td><b>GDS-Conciliaciones</b></td><td>.NET 4.6/4.7</td><td style="color:var(--text3);">Pendiente</td><td style="color:var(--text3);">—</td><td style="color:var(--text3);">—</td><td><span class="badge b-amber">Por tallar</span></td></tr>
+        <tr><td><b>TrapasoTAAD</b></td><td>Java 8/11 proceso</td><td style="color:var(--text3);">Pendiente</td><td style="color:var(--text3);">—</td><td style="color:var(--text3);">—</td><td><span class="badge b-amber">Por tallar</span></td></tr>
+        <tr><td><b>AVX</b></td><td>Java 8/11 web</td><td style="color:var(--text3);">Pendiente</td><td style="color:var(--text3);">—</td><td style="color:var(--text3);">—</td><td><span class="badge b-amber">Por tallar</span></td></tr>
+        <tr><td><b>Revisión garantías AVM</b></td><td>.NET 4.7</td><td style="color:var(--text3);">Pendiente</td><td style="color:var(--text3);">—</td><td style="color:var(--text3);">—</td><td><span class="badge b-amber">Por tallar</span></td></tr>
+      </tbody>
+    </table>
+  </div></div>
+</div>
+
+<!-- ═══ PERSONAS ═══ -->
+<div class="pane" id="pane-personas">
+  <div class="topbar"><div><div class="page-title">Recursos y staffing</div><div class="page-sub">Entradas · pendientes · posiciones sin cubrir</div></div></div>
+  <div class="section-hdr">Entradas confirmadas</div>
+  <div class="card"><div class="card-body">
+    <div class="person-row"><div class="avatar av-green">YM</div><div style="flex:1"><div class="person-name">Yoan Marin</div><div class="person-detail">OpenBank · 29 junio · interno recolocado</div></div><span class="badge b-green">Confirmado</span></div>
+    <div class="person-row"><div class="avatar av-blue">BM</div><div style="flex:1"><div class="person-name">Bernardo Martinez</div><div class="person-detail">nCino 2026-39683 · 6 julio · 60€/h · margen 42% · 9-16h verano · alta MTE pendiente</div></div><span class="badge b-green">Confirmado</span></div>
+  </div></div>
+  <div class="section-hdr">Pendientes de confirmar</div>
+  <div class="card"><div class="card-body">
+    <div class="person-row"><div class="avatar av-amber">JA</div><div style="flex:1"><div class="person-name">Jahiro Álvarez</div><div class="person-detail">OpenBank · 6 julio · 60€/h · ¿firmó contrato? · alta MTE + 2 equipos Mac+Hiberus</div></div><span class="badge b-red">SBA pendiente</span></div>
+    <div class="person-row"><div class="avatar av-amber">BB</div><div style="flex:1"><div class="person-name">Brian Camilo Bolívar</div><div class="person-detail">BBVA · 47€/h · pendiente fecha entrevista banco · trámite PAC</div></div><span class="badge b-amber">Entrevista pdte.</span></div>
+  </div></div>
+  <div class="section-hdr">Posiciones urgentes sin cubrir · Java + SpringBoot</div>
+  <div class="card"><div class="card-body">
+    <div class="person-row"><div class="avatar av-red">!</div><div style="flex:1"><div class="person-name">Arquitecto Backend Java/SpringBoot · Sanitas</div><div class="person-detail">Kickoff 6 julio · 13 días · consultado a Verónica · pendiente respuesta</div></div><span class="badge b-red">HOY</span></div>
+    <div class="person-row"><div class="avatar av-red">!</div><div style="flex:1"><div class="person-name">2 perfiles Santander · Java/SpringBoot</div><div class="person-detail">1 julio · perfil exacto por confirmar con Natalia Lirón</div></div><span class="badge b-red">1 jul</span></div>
+    <div class="person-row"><div class="avatar av-red">!</div><div style="flex:1"><div class="person-name">DevOps · BBVA Code2Doc · Tandazo??</div><div class="person-detail">Arranca 1 julio · 65€/h · 1 mes · confirmar con Verónica</div></div><span class="badge b-red">1 jul</span></div>
+    <div class="person-row"><div class="avatar av-amber">!</div><div style="flex:1"><div class="person-name">Arquitecto Plataforma · BBVA Cecabank</div><div class="person-detail">Verónica Encinas · arranca julio · sin candidato</div></div><span class="badge b-amber">Julio</span></div>
+    <div class="person-row"><div class="avatar av-amber">!</div><div style="flex:1"><div class="person-name">Backend Sr + 2 Middle · Sanitas · Java/SpringBoot</div><div class="person-detail">Perfiles definitivos tras reunión de hoy</div></div><span class="badge b-amber">Julio</span></div>
+    <div class="person-row"><div class="avatar av-amber">!</div><div style="flex:1"><div class="person-name">Salesforce · nCino 2ª posición</div><div class="person-detail">Área Laura/Thania · sin candidato · fecha TBD</div></div><span class="badge b-amber">Julio</span></div>
+  </div></div>
+  <div class="section-hdr">Movimientos recientes</div>
+  <div class="card"><div class="card-body">
+    <div class="person-row"><div class="avatar av-gray">JT</div><div style="flex:1"><div class="person-name">Javier Toro</div><div class="person-detail">Libre el 1 julio desde Santander · candidato BBVA Squad IA + Banca March</div></div><span class="badge b-blue">Libre 1 jul</span></div>
+    <div class="person-row"><div class="avatar av-gray">CS</div><div style="flex:1"><div class="person-name">Carmen Sirgo</div><div class="person-detail">Sale de Santander el 1 julio · candidata BBVA Squad IA</div></div><span class="badge b-blue">Libre 1 jul</span></div>
+    <div class="person-row"><div class="avatar av-gray">LN</div><div style="flex:1"><div class="person-name">Luis Novoa</div><div class="person-detail">Cubre a Carles Contell en Caixa mientras está de vacaciones</div></div><span class="badge b-green">Cubriendo Caixa</span></div>
+  </div></div>
+</div>
+
+<!-- ═══ CIERRE MES ═══ -->
+<div class="pane" id="pane-cierre">
+  <div class="topbar">
+    <div><div class="page-title">Cierre de mes · Junio 2026</div><div class="page-sub">7 días para el 30 · marca cada tarea conforme la completes</div></div>
+    <div id="check-counter" class="badge b-gray" style="font-size:12px;padding:5px 12px;">0 / 13</div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Checklist</div></div>
+      <div class="card-body" id="checklist">
+        <div class="check-row" onclick="toggle(this)"><div class="checkbox"><span class="check-tick">✓</span></div><div style="flex:1"><div class="check-label">KVP — imputar horas semana (manual, día a día)</div><div class="check-meta">kvpproject.hiberus.com · HOY · obligatorio para facturar</div></div><span class="badge b-red">HOY</span></div>
+        <div class="check-row" onclick="toggle(this)"><div class="checkbox"><span class="check-tick">✓</span></div><div style="flex:1"><div class="check-label">KVP — previsión horas hasta el 30 junio</div><div class="check-meta">Semana 3 del mes = previsión obligatoria</div></div><span class="badge b-red">HOY</span></div>
+        <div class="check-row" onclick="toggle(this)"><div class="checkbox"><span class="check-tick">✓</span></div><div style="flex:1"><div class="check-label">Alta Bernardo en MTE · proyecto 2026-39683</div><div class="check-meta">Preguntar a Bea Aranda cómo se hace el alta</div></div><span class="badge b-red">HOY</span></div>
+        <div class="check-row" onclick="toggle(this)"><div class="checkbox"><span class="check-tick">✓</span></div><div style="flex:1"><div class="check-label">Pedir código proyecto Sanitas · Healthy Cities</div><div class="check-meta">Sin código no hay MTE · Bea o Enrique López</div></div><span class="badge b-red">HOY</span></div>
+        <div class="check-row" onclick="toggle(this)"><div class="checkbox"><span class="check-tick">✓</span></div><div style="flex:1"><div class="check-label">Confirmar estado entrega Copernicus F1 · Juan Luis Deza</div><div class="check-meta">Entrega 30 junio · 7 días · sin margen</div></div><span class="badge b-red">HOY</span></div>
+        <div class="check-row" onclick="toggle(this)"><div class="checkbox"><span class="check-tick">✓</span></div><div style="flex:1"><div class="check-label">Hablar con Natalia Lirón — 2 bajas Santander</div><div class="check-meta">Identificar perfiles Java/SpringBoot · arrancar búsqueda</div></div><span class="badge b-red">HOY</span></div>
+        <div class="check-row" onclick="toggle(this)"><div class="checkbox"><span class="check-tick">✓</span></div><div style="flex:1"><div class="check-label">Alta Carles Contell en MTE · Caixa Isla Indra</div><div class="check-meta">Preguntar a Bea cómo se da de alta en MTE</div></div><span class="badge b-amber">Esta semana</span></div>
+        <div class="check-row" onclick="toggle(this)"><div class="checkbox"><span class="check-tick">✓</span></div><div style="flex:1"><div class="check-label">Facturación Santander · cerrar junio con Natalia</div><div class="check-meta">~64.000€ · 11 recursos</div></div><span class="badge b-amber">Antes 27 jun</span></div>
+        <div class="check-row" onclick="toggle(this)"><div class="checkbox"><span class="check-tick">✓</span></div><div style="flex:1"><div class="check-label">Facturación OpenBank · cerrar junio</div><div class="check-meta">~66.000€ · 9 recursos · doble coste</div></div><span class="badge b-amber">Antes 27 jun</span></div>
+        <div class="check-row" onclick="toggle(this)"><div class="checkbox"><span class="check-tick">✓</span></div><div style="flex:1"><div class="check-label">Facturación Ibercaja · aprovechar reunión del jueves</div><div class="check-meta">~95.000€ · Ignacio Carcas</div></div><span class="badge b-amber">Jueves</span></div>
+        <div class="check-row" onclick="toggle(this)"><div class="checkbox"><span class="check-tick">✓</span></div><div style="flex:1"><div class="check-label">Facturación Caixa Isla Indra · coordinar con Yury</div><div class="check-meta">~42.000€ · Yury lleva la parte económica</div></div><span class="badge b-amber">Antes 27 jun</span></div>
+        <div class="check-row" onclick="toggle(this)"><div class="checkbox"><span class="check-tick">✓</span></div><div style="flex:1"><div class="check-label">Facturación Copernicus F1 · junto con entrega</div><div class="check-meta">~14.000€ · entrega 30 jun</div></div><span class="badge b-amber">30 jun</span></div>
+        <div class="check-row" onclick="toggle(this)"><div class="checkbox"><span class="check-tick">✓</span></div><div style="flex:1"><div class="check-label">Evidencias junio · anotar tareas ya · email a Bea</div><div class="check-meta">Antes 15 julio · primer envío tuyo</div></div><span class="badge b-blue">Antes 15 jul</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Estimado facturación junio</div></div>
+        <div class="card-body">
+          <div class="row"><div class="row-l"><div class="row-title">Santander Microservicios</div></div><b>64.051€</b></div>
+          <div class="row"><div class="row-l"><div class="row-title">OpenBank</div></div><b>66.664€</b></div>
+          <div class="row"><div class="row-l"><div class="row-title">Ibercaja Bambú</div></div><b>94.988€</b></div>
+          <div class="row"><div class="row-l"><div class="row-title">Caixa Isla Indra</div></div><b>42.466€</b></div>
+          <div class="row"><div class="row-l"><div class="row-title">Copernicus F1</div></div><b>13.925€</b></div>
+          <div class="row"><div class="row-l"><div class="row-title">BBVA Microservicios</div></div><b>10.112€</b></div>
+          <div class="row"><div class="row-l"><div class="row-title">Banca March</div></div><b>7.300€</b></div>
+          <div class="total-row"><div class="total-label">Total estimado junio</div><div class="total-val">299.506€</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Formato evidencias</div></div>
+        <div class="card-body">
+          <div class="alert alert-blue" style="margin:0;">
+            <div class="alert-title">Asunto: [Cliente] - Junio - Tareas</div>
+            <div class="alert-sub">Email NUEVO cada mes · no responder al anterior · a Bea Aranda · tareas de desarrollo y análisis · sin adjunto · antes del 15 de julio</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ORGANIGRAMA ═══ -->
+<div class="pane" id="pane-orgchart">
+  <div class="topbar"><div><div class="page-title">Organigrama Hiberus</div><div class="page-sub">Jerarquía real · Estructura 2026</div></div></div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Cadena de mando</div></div>
+      <div class="card-body">
+        <div class="org-node org-1 org-white"><div><div class="org-node-name">Sergio López</div><div class="org-node-role">Director General</div></div></div>
+        <div class="org-indent">
+          <div class="org-node org-2 org-white"><div><div class="org-node-name">Eduardo Lorente</div><div class="org-node-role">Responsable de Mercados · ex-CEO Vass</div></div></div>
+          <div class="org-indent">
+            <div class="org-node org-2 org-white"><div><div class="org-node-name">Loreto Rincón</div><div class="org-node-role">Resp. Servicios Financieros · Madrid · informar de problemas</div></div></div>
+            <div class="org-indent">
+              <div class="org-node org-2 org-white"><div><div class="org-node-name">Sergio Gil García</div><div class="org-node-role">Tu manager · sgil@hiberus.com</div></div></div>
+              <div class="org-indent">
+                <div class="org-node org-you"><div><div class="org-node-name" style="color:var(--amber-dark);">Jorge Riveiro · TÚ</div><div class="org-node-role" style="color:var(--amber-mid);">PM Banca y Seguros (40) · con Yury Cáceres</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Estructura 2026 · Áreas</div></div>
+      <div class="card-body">
+        <div class="org-node org-you" style="margin-bottom:6px;"><div><div class="org-node-name" style="color:var(--amber-dark);">BANCA Y SEGUROS (40) · TÚ</div><div class="org-node-role" style="color:var(--amber-mid);">Santander · OpenBank · BBVA · Ibercaja · Banca March · nCino · Maphre · Sanitas</div></div></div>
+        <div class="org-node org-ref" style="margin-bottom:4px;"><div><div class="org-node-name">AAPP Y SANIDAD (28) · Javier Decena</div></div></div>
+        <div class="org-node org-ref" style="margin-bottom:4px;"><div><div class="org-node-name">SERVICIOS Y MEDIA (24+6) · Héctor Villena</div></div></div>
+        <div class="org-node org-ref" style="margin-bottom:4px;"><div><div class="org-node-name">INDUSTRIA (27) · Raquel Latras</div></div></div>
+        <div class="org-node org-ref" style="margin-bottom:4px;"><div><div class="org-node-name">RETAIL/UTILITIES/TRAVEL (13+13) · Adrián Peiró</div></div></div>
+        <div class="org-node org-ref" style="margin-bottom:4px;"><div><div class="org-node-name">ECI (75) · Oscar Naval</div></div></div>
+        <div class="org-node org-ref"><div><div class="org-node-name">INDITEX (49) · Adrián Peiró</div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="section-hdr">Referencias operativas</div>
+  <div class="card"><div class="card-body">
+    <div class="person-row"><div class="avatar av-blue">BA</div><div style="flex:1"><div class="person-name">Bea Aranda</div><div class="person-detail">Referencia operativa día a día · evidencias mensuales · preguntas de procesos · alta en MTE</div></div></div>
+    <div class="person-row"><div class="avatar av-green">YC</div><div style="flex:1"><div class="person-name">Yury Cáceres</div><div class="person-detail">Facturación banca y seguros · parte económica · compañera directa</div></div></div>
+  </div></div>
+</div>
+
+<!-- ═══ CONTACTOS ═══ -->
+<div class="pane" id="pane-contactos">
+  <div class="topbar"><div><div class="page-title">Contactos clave</div><div class="page-sub">Internos · contacto directo · Clientes · preguntar internamente antes</div></div></div>
+  <div class="section-hdr">Internos Hiberus</div>
+  <div class="card"><div class="card-body">
+    <div class="person-row"><div class="avatar av-navy">SG</div><div style="flex:1"><div class="person-name">Sergio Gil García</div><div class="person-detail">Tu manager · sgil@hiberus.com</div></div><span class="badge b-navy">Manager</span></div>
+    <div class="person-row"><div class="avatar av-blue">BA</div><div style="flex:1"><div class="person-name">Bea Aranda</div><div class="person-detail">Referencia operativa · evidencias · MTE</div></div><span class="badge b-blue">Referencia</span></div>
+    <div class="person-row"><div class="avatar av-green">YC</div><div style="flex:1"><div class="person-name">Yury Cáceres</div><div class="person-detail">Facturación banca y seguros</div></div><span class="badge b-green">Compañera</span></div>
+    <div class="person-row"><div class="avatar av-gray">NL</div><div style="flex:1"><div class="person-name">Natalia Lirón</div><div class="person-detail">Gerente cuenta Santander · gestiona a Jesús López Tormo</div></div><span class="badge b-gray">Gerente</span></div>
+    <div class="person-row"><div class="avatar av-gray">VS</div><div style="flex:1"><div class="person-name">Verónica Sánchez Medero</div><div class="person-detail">Gestora BBVA · Code2Doc + Squad IA + Microservicios</div></div><span class="badge b-gray">Gerente</span></div>
+    <div class="person-row"><div class="avatar av-gray">JH</div><div style="flex:1"><div class="person-name">Javier Hernaiz Gutiérrez</div><div class="person-detail">Gerente Banca March + nCino · Madrid · jhernaiz@hiberus.com · 687 768 482</div></div><span class="badge b-gray">Gerente</span></div>
+    <div class="person-row"><div class="avatar av-gray">AE</div><div style="flex:1"><div class="person-name">Adrián Esteban Molina</div><div class="person-detail">Gerente Caixa · NO confundir con Adrián Alexandre (cliente .NET)</div></div><span class="badge b-gray">Gerente</span></div>
+    <div class="person-row"><div class="avatar av-gray">JD</div><div style="flex:1"><div class="person-name">Juan Luis Deza</div><div class="person-detail">Gerente Copernicus · Zaragoza</div></div><span class="badge b-gray">Gerente</span></div>
+    <div class="person-row"><div class="avatar av-gray">IC</div><div style="flex:1"><div class="person-name">Ignacio Carcas</div><div class="person-detail">Responsable Ibercaja · reunión jueves</div></div><span class="badge b-gray">Gerente</span></div>
+  </div></div>
+  <div class="section-hdr">Clientes · siempre a través de internos primero</div>
+  <div class="card"><div class="card-body">
+    <div class="person-row"><div class="avatar av-purple">CZ</div><div style="flex:1"><div class="person-name">Carlos Zapata Ferrer</div><div class="person-detail">Caixa · Owner Isla Indra · muy detallista · tiene Jira · cód padre 2026-39220</div></div><span class="badge b-purple">Cliente</span></div>
+    <div class="person-row"><div class="avatar av-purple">AA</div><div style="flex:1"><div class="person-name">Álvaro Alcay</div><div class="person-detail">OpenBank · co-responsable con Felipe · penalizan si no hay recurso</div></div><span class="badge b-purple">Cliente</span></div>
+    <div class="person-row"><div class="avatar av-purple">JL</div><div style="flex:1"><div class="person-name">Jesús López Tormo</div><div class="person-detail">Santander · principal · siempre a través de Natalia Lirón</div></div><span class="badge b-purple">Cliente</span></div>
+    <div class="person-row"><div class="avatar av-purple">TP</div><div style="flex:1"><div class="person-name">Thania Paradelo</div><div class="person-detail">nCino · tparadelo@hiberus.com · gestión día a día Bernardo</div></div><span class="badge b-purple">Cliente</span></div>
+    <div class="person-row"><div class="avatar av-purple">JDe</div><div style="flex:1"><div class="person-name">Javier Decena</div><div class="person-detail">Banco de España · Smart Evolution · cierre miércoles</div></div><span class="badge b-purple">Cliente</span></div>
+  </div></div>
+</div>
+
+</main>
+</div>
+
+<script>
+function nav(el,id){
+  document.querySelectorAll('.sb-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('pane-'+id).classList.add('active');
+}
+function goTo(id){
+  const items=document.querySelectorAll('.sb-item');
+  items.forEach(n=>{
+    if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'")){
+      n.classList.add('active');
+    } else {
+      n.classList.remove('active');
+    }
+  });
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pane-'+id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function toggle(row){
+  const box=row.querySelector('.checkbox');
+  const label=row.querySelector('.check-label');
+  box.classList.toggle('done');
+  label.classList.toggle('done');
+  updateCounter();
+}
+function updateCounter(){
+  const total=document.querySelectorAll('.check-row').length;
+  const done=document.querySelectorAll('.checkbox.done').length;
+  const el=document.getElementById('check-counter');
+  el.textContent=done+' / '+total;
+  el.className='badge '+(done===total?'b-green':(done>0?'b-amber':'b-gray'));
+  el.style.fontSize='12px';el.style.padding='5px 12px';
+}
+function calcPoc(){
+  const v=parseFloat(document.getElementById('coste-poc').value)||0;
+  const fmt=n=>n.toLocaleString('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+  document.getElementById('p25').textContent=fmt(v*0.25);
+  document.getElementById('precio25').textContent=fmt(v*1.25);
+  document.getElementById('precio35').textContent=fmt(v*1.35);
+}
+</script>
+</body>
+</html>
